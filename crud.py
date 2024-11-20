@@ -103,27 +103,28 @@ def criar_produto():
     nome = input("Digite o nome do produto: ")
     descricao = input("Digite a descrição do produto: ")
     preco = input("Digite o preço do produto: ")
-    
+
     produto = Produto(nome=nome, descricao=descricao, preco=preco)
     session.add(produto)
     session.commit()
     print('Produto criado com sucesso!')
     
+def criar_item_venda(id_venda, id_produto, quantidade, preco_unitario):
+    item_venda = ItemVenda(id_venda=id_venda, id_produto=id_produto, quantidade=quantidade, preco_unitario=preco_unitario)
+    
+    session.add(item_venda)
+    session.commit()
+    print('Item de venda criado com sucesso!')
+    
 def criar_venda(data_venda, valor_total, cliente_id):
     data_venda = date.today()
-    valor_total = input("Digite o valor total da venda: ")
     cliente_id = input("Digite o id do cliente: ")
+    valor_total = sum([item.preco_unitario * item.quantidade for item in item_venda])
     
     venda = Venda(data_venda=data_venda, valor_total=valor_total, cliente_id=cliente_id)
     session.add(venda)
     session.commit()
     print('Venda criada com sucesso!')
-    
-def criar_item_venda(id_venda, id_produto, quantidade, preco_unitario):
-    item_venda = ItemVenda(id_venda=id_venda, id_produto=id_produto, quantidade=quantidade, preco_unitario=preco_unitario)
-    session.add(item_venda)
-    session.commit()
-    print('Item de venda criado com sucesso!')
     
 def criar_categoria(nome, descricao):
     categoria = Categoria(nome=nome, descricao=descricao)
@@ -177,7 +178,70 @@ def atualizar_produto(id, nome, descricao, preco):
         
 #DELETE
 
-
+def deletar_cliente_por_id(id):
+    cliente = session.query(Cliente).filter(Cliente.id == id).first()
+    if cliente:
+        session.delete(cliente)
+        session.commit()
+        print('Cliente deletado com sucesso!')
+    else:
+        print('Cliente não encontrado!')
+        
+def deletar_cliente_por_nome(nome):
+    cliente = session.query(Cliente).filter(Cliente.nome == nome).first()
+    if cliente:
+        session.delete(cliente)
+        session.commit()
+        print('Cliente deletado com sucesso!')
+    else:
+        print('Cliente não encontrado!')
+        
+def deletar_produto_por_id(id):
+    produto = session.query(Produto).filter(Produto.id == id).first()
+    if produto:
+        session.delete(produto)
+        session.commit()
+        print('Produto deletado com sucesso!')
+    else:
+        print('Produto não encontrado!')
+        
+def deletar_produto_por_nome(nome):
+    produto = session.query(Produto).filter(Produto.nome == nome).first()
+    if produto:
+        session.delete(produto)
+        session.commit()
+        print('Produto deletado com sucesso!')
+    else:
+        print('Produto não encontrado!')
+        
+def deletar_venda(id):
+    venda = session.query(Venda).filter(Venda.id == id).first()
+    if venda:
+        session.delete(venda)
+        session.commit()
+        print('Venda deletada com sucesso!')
+    else:
+        print('Venda não encontrada!')
+        
+def deletar_categoria_por_id(id):
+    categoria = session.query(Categoria).filter(Categoria.id == id).first()
+    if categoria:
+        session.delete(categoria)
+        session.commit()
+        print('Categoria deletada com sucesso!')
+    else:
+        print('Categoria não encontrada!')
+        
+def deletar_categoria_por_nome(nome):
+    categoria = session.query(Categoria).filter(Categoria.nome == nome).first()
+    if categoria:
+        session.delete(categoria)
+        session.commit()
+        print('Categoria deletada com sucesso!')
+    else:
+        print('Categoria não encontrada!')
+        
+#closing the connection
 
 cursor.close()
 connection.close()
