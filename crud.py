@@ -176,6 +176,16 @@ def atualizar_produto(id, nome, descricao, preco):
     else:
         print('Produto não encontrado!')
         
+def atualizar_categoria(id, nome, descricao):
+    categoria = session.query(Categoria).filter(Categoria.id == id).first()
+    if categoria:
+        categoria.nome = nome
+        categoria.descricao = descricao
+        session.commit()
+        print('Categoria atualizada com sucesso!')
+    else:
+        print('Categoria não encontrada!')
+        
 #DELETE
 
 def deletar_cliente_por_id(id):
