@@ -1,24 +1,18 @@
+import database.db_config as db
+
 import mysql.connector
 from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import date
 
-# Connect to the database
-connection = mysql.connector.connect(
-    user= 'root',
-    password= '1703Lunna@',
-    host= '127.0.0.1',
-    database= 'LojaRoupas',
-)
+connection = db.connection
+cursor = db.connection.cursor()
 
-cursor = connection.cursor()
-
-comando = ''
-cursor.execute(comando)
-connection.commit() #editar o banco de dados
-resultado = cursor.fetchall() #ler o banco de dados
-
+#comando = ''
+#cursor.execute(comando)
+#connection.commit() #editar o banco de dados
+#resultado = cursor.fetchall() #ler o banco de dados
 
 
 engine = create_engine('sqlite:///LojaRoupas.db')
@@ -89,6 +83,7 @@ Base.metadata.create_all(engine)
 #CRUD operations
 
 #CREATE
+
 def criar_cliente():
     nome = input("Digite o nome do cliente: ")
     email = input("Digite o email do cliente: ")
@@ -117,6 +112,10 @@ def criar_item_venda(id_venda, id_produto, quantidade, preco_unitario):
     print('Item de venda criado com sucesso!')
     
 def criar_venda(data_venda, valor_total, cliente_id):
+    #carregar a lista de produtos da venda por id
+    #item_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda).all()
+    
+    
     data_venda = date.today()
     cliente_id = input("Digite o id do cliente: ")
     valor_total = sum([item.preco_unitario * item.quantidade for item in item_venda])
