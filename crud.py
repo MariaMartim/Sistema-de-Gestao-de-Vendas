@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 from datetime import date
 
 connection = db.connection
-cursor = db.connection.cursor()
+#cursor = db.connection.cursor()
 
 #comando = ''
 #cursor.execute(comando)
@@ -113,7 +113,10 @@ def criar_item_venda(id_venda, id_produto, quantidade, preco_unitario):
     
 def criar_venda(data_venda, valor_total, cliente_id):
     #carregar a lista de produtos da venda por id
-    #item_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda).all()
+    
+    
+    item_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda).all()
+    
     
     
     data_venda = date.today()
@@ -252,5 +255,4 @@ def deletar_categoria_por_nome(nome):
         
 #closing the connection
 
-cursor.close()
 connection.close()
