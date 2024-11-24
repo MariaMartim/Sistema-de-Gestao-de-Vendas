@@ -1,13 +1,14 @@
-import database.db_config as db
+from database import db_config as db
 
 import mysql.connector
+from mysql.connector import Error
 from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import date
 
-connection = db.connection
-cursor = db.connection.cursor()
+# connection = db.connection
+# cursor = db.connection.cursor()
 
 #comando = ''
 #cursor.execute(comando)
@@ -19,6 +20,26 @@ engine = create_engine('sqlite:///LojaRoupas.db')
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 session = Session()
+
+def testar_conexao():
+    try:
+        
+
+        # Verificando se a conexão foi bem-sucedida
+        if db.connection.is_connected():
+            print("Conexão bem-sucedida com o banco de dados!")
+            db_info = db.connection.get_server_info()
+            print("Versão do servidor MySQL:", db_info)
+            return True  # Retorna True para indicar que a conexão foi bem-sucedida
+
+    except Error as err:
+        print("Erro ao conectar ao banco de dados:", err)
+        return False  # Retorna False caso haja erro na conexão
+
+    finally:
+        if db.connection.is_connected():
+            db.connection.close()  # Fecha a conexão
+            print("Conexão com o MySQL encerrada.")
 
 #Modelos
 class Cliente(Base):
@@ -37,6 +58,7 @@ class Produto(Base):
     nome = Column(String(100), nullable=False)
     descricao = Column(String(100), nullable=False)
     preco = Column(Float, nullable=False)
+    quantidade_estoque = Column(Integer, nullable=False)
     
 class Venda(Base):
     __tablename__ = 'Venda'
@@ -67,15 +89,7 @@ class Categoria(Base):
     nome = Column(String(50), nullable=False)
     descricao = Column(String(100), nullable=False)
     
-class Estoque(Base):
-    __tablename__ = 'Estoque'
-    
-    id = Column(Integer, primary_key=True)
-    id_produto = Column(Integer, ForeignKey('Produto.id'))
-    quantidade = Column(Integer, nullable=False)
-    referencia = Column(String(15), nullable=False)
-    
-    produto = relationship('Produto')
+
     
 #creating tables
 Base.metadata.create_all(engine)
@@ -85,16 +99,23 @@ Base.metadata.create_all(engine)
 #CREATE
 
 def criar_cliente():
+    cursor = db.connection.cursor()
+    
     nome = input("Digite o nome do cliente: ")
     email = input("Digite o email do cliente: ")
     telefone = input("Digite o telefone do cliente: ")
+    endereco = input("Digite o endereço do cliente: ")
     
-    cliente = Cliente(nome=nome, email=email, telefone=telefone)
+    cliente = Cliente(nome=nome, email=email, telefone=telefone, endereco=endereco)
     session.add(cliente)
     session.commit()
     print('Cliente criado com sucesso!')
+    # cursor.close()
     
 def criar_produto():
+    cursor = db.connection.cursor()
+
+    
     nome = input("Digite o nome do produto: ")
     descricao = input("Digite a descrição do produto: ")
     preco = input("Digite o preço do produto: ")
@@ -104,14 +125,23 @@ def criar_produto():
     session.commit()
     print('Produto criado com sucesso!')
     
+    cursor.close()
+    
 def criar_item_venda(id_venda, id_produto, quantidade, preco_unitario):
+    cursor = db.connection.cursor()
+    
     item_venda = ItemVenda(id_venda=id_venda, id_produto=id_produto, quantidade=quantidade, preco_unitario=preco_unitario)
     
     session.add(item_venda)
     session.commit()
     print('Item de venda criado com sucesso!')
     
+    cursor.close()
+    
 def criar_venda(data_venda, valor_total, cliente_id):
+    cursor = db.connection.cursor()
+
+    
     #carregar a lista de produtos da venda por id
     #item_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda).all()
     
@@ -125,35 +155,66 @@ def criar_venda(data_venda, valor_total, cliente_id):
     session.commit()
     print('Venda criada com sucesso!')
     
+    cursor.close()
+    
 def criar_categoria(nome, descricao):
+    cursor = db.connection.cursor()
+    
     categoria = Categoria(nome=nome, descricao=descricao)
     session.add(categoria)
     session.commit()
     print('Categoria criada com sucesso!')
     
+    cursor.close()
+    
 #READ
 def ler_clientes():
-    clientes = session.query(Cliente).all()
-    for cliente in clientes:
-        print(cliente.id, cliente.nome, cliente.email, cliente.telefone)
+    testar_conexao()
+    
+    cursor = db.connection.cursor()
+    
+    
+    cursor.execute('SELECT * FROM Cliente')
+    for linha in cursor.fetchall():
+        print(linha)
+        
+    cursor.close()
+        
+    #clientes = session.query(Cliente).all()
+    #for cliente in clientes:
+        #print(cliente.id, cliente.nome, cliente.email, cliente.telefone)
 
 def ler_produtos():
+    cursor = db.connection.cursor()
+
     produtos = session.query(Produto).all()
     for produto in produtos:
         print(produto.id, produto.nome, produto.descricao, produto.preco)
         
+    cursor.close()
+
 def ler_vendas():
+    cursor = db.connection.cursor()
+    
     vendas = session.query(Venda).all()
     for venda in vendas:
         print(venda.id, venda.data_venda, venda.valor_total, venda.cliente_id)
         
+    cursor.close()
+        
 def ler_categorias():
+    cursor = db.connection.cursor()
+
     categorias = session.query(Categoria).all()
     for categoria in categorias:
         print(categoria.id, categoria.nome, categoria.descricao)
     
+    cursor.close()
+
 #UPDATE
 def atualizar_cliente(id, nome, email, telefone):
+    cursor = db.connection.cursor()
+
     cliente = session.query(Cliente).filter(Cliente.id == id).first()
     if cliente:
         cliente.nome = nome
@@ -164,7 +225,11 @@ def atualizar_cliente(id, nome, email, telefone):
     else:
         print('Cliente não encontrado!')
         
+    cursor.close()
+
 def atualizar_produto(id, nome, descricao, preco):
+    cursor = db.connection.cursor()
+
     produto = session.query(Produto).filter(Produto.id == id).first()
     if produto:
         produto.nome = nome
@@ -250,7 +315,6 @@ def deletar_categoria_por_nome(nome):
     else:
         print('Categoria não encontrada!')
         
-#closing the connection
-
-cursor.close()
-connection.close()
+        
+# closing the connection
+# connection.close()
