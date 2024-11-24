@@ -4,14 +4,16 @@ def create_tables():
     c.Base.metadata.create_all(c.engine)
     
 def menu_create():
-    print("\n O que deseja cadastrar? \n")
-    print("1 - Cliente")
-    print("2 - Produto")
-    print("3 - Categoria")
-    
-    op = int(input("Digite a opção desejada: "))
     
     while True:
+        print("\n O que deseja cadastrar? \n")
+        print("1 - Cliente")
+        print("2 - Produto")
+        print("3 - Categoria")
+        print("0 - Voltar")
+    
+        op = int(input("Digite a opção desejada: "))
+    
         if op == 1:
             c.criar_cliente()
         elif op == 2:
@@ -20,19 +22,23 @@ def menu_create():
             c.criar_categoria()
         elif op == 0:
             break
+        else:
+            print("Opção inválida!")
     
 def menu_read():
-    print("\n O que deseja listar? \n")
-    print("1 - Clientes")
-    print("2 - Produtos")
-    print("3 - Categorias")
     
-    op = int(input("Digite a opção desejada: "))
+    while True:  
+        print("\n O que deseja listar? \n")
+        print("1 - Clientes")
+        print("2 - Produtos")
+        print("3 - Categorias")
+        print("0 - Voltar")
+    
+        op = int(input("Digite a opção desejada: "))
 
-    while True:
+    
         if op == 1:
             c.ler_clientes()
-            break
         elif op == 2:
             c.ler_produtos()
             break
@@ -41,16 +47,20 @@ def menu_read():
             break
         elif op == 0:
             break
+        else:
+            print("Opção inválida!")
     
 def menu_update():
-    print("\n O que deseja atualizar? \n")
-    print("1 - Cliente")
-    print("2 - Produto")
-    print("3 - Categoria")
-    
-    op = int(input("Digite a opção desejada: "))
     
     while True:
+        print("\n O que deseja atualizar? \n")
+        print("1 - Cliente")
+        print("2 - Produto")
+        print("3 - Categoria")
+        print("0 - Voltar")
+    
+        op = int(input("Digite a opção desejada: "))
+    
         if op == 1:
             print("\n O que deseja atualizar? \n")
             print("1 - Nome")
@@ -65,13 +75,31 @@ def menu_update():
             c.atualizar_categoria()
         elif op == 0:
             break
+        else:
+            print("Opção inválida!")
     
     
 def menu_delete():
-    print("\n O que deseja deletar? \n")
-    print("1 - Cliente")
-    print("2 - Produto")
-    print("3 - Categoria")
+    
+    while True:
+        print("\n O que deseja deletar? \n")
+        print("1 - Cliente")
+        print("2 - Produto")
+        print("3 - Categoria")
+        print("0 - Voltar")
+    
+        op = int(input("Digite a opção desejada: "))
+    
+        if op == 1:
+            c.deletar_cliente()
+        elif op == 2:
+            c.deletar_produto()
+        elif op == 3:
+            c.deletar_categoria()
+        elif op == 0:
+            break
+        else:
+            print("Opção inválida!")
     
     
 
@@ -93,8 +121,10 @@ def menu():
                 
                 if opcao == 1:
                     c.criar_cliente()
+                    break
                 elif opcao == 2:
                     c.criar_produto()
+                    break
                 elif opcao == 3:
                     c.criar_categoria()
                 elif opcao == 0:
@@ -108,20 +138,17 @@ def menu():
         elif opcao == 3:
             while True:
                 menu_update()
-                opcao = int(input("Digite a opção desejada: "))
-                
-                if opcao == 1:
-                    c.atualizar_cliente()
-                elif opcao == 2:
-                    c.atualizar_produto()
-                elif opcao == 3:
-                    c.atualizar_categoria()
-                elif opcao == 0:
-                    break
+                break
+            
         elif opcao == 4:
             while True:
                 menu_delete()
+                break
+            
         elif opcao == 0:
             break
+        
+        else:
+            print("Opção inválida!")
         
 menu()

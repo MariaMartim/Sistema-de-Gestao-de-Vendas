@@ -3,18 +3,10 @@ from database import db_config as db
 import mysql.connector
 from mysql.connector import Error
 from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey, Date
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, declarative_base
 from datetime import date
 
-# connection = db.connection
-# cursor = db.connection.cursor()
-
-#comando = ''
-#cursor.execute(comando)
-#connection.commit() #editar o banco de dados
-#resultado = cursor.fetchall() #ler o banco de dados
-
+connection = db.connection
 
 engine = create_engine('sqlite:///LojaRoupas.db')
 Base = declarative_base()
@@ -23,8 +15,6 @@ session = Session()
 
 def testar_conexao():
     try:
-        
-
         # Verificando se a conexão foi bem-sucedida
         if db.connection.is_connected():
             print("Conexão bem-sucedida com o banco de dados!")
@@ -45,50 +35,52 @@ def testar_conexao():
 class Cliente(Base):
     __tablename__ = 'Cliente'
     
-    id = Column(Integer, primary_key=True)
+    id_cliente = Column(Integer, primary_key=True, autoincrement=True)
     nome = Column(String(50), nullable=False)
     email = Column(String(80), nullable=False)
     telefone = Column(String(11), nullable=False)
     endereco = Column(String(200), nullable=False)
-
-class Produto(Base):
-    __tablename__ = 'Produto'
-    
-    id = Column(Integer, primary_key=True)
-    nome = Column(String(100), nullable=False)
-    descricao = Column(String(100), nullable=False)
-    preco = Column(Float, nullable=False)
-    quantidade_estoque = Column(Integer, nullable=False)
     
 class Venda(Base):
     __tablename__ = 'Venda'
     
-    id = Column(Integer, primary_key=True)
+    id_venda = Column(Integer, primary_key=True, autoincrement=True)
     data_venda = Column(Date, nullable=False)
     valor_total = Column(Float, nullable=False)
-    cliente_id = Column(Integer, ForeignKey('Cliente.id'))
+    id_cliente = Column(Integer, ForeignKey('Cliente.id_cliente'))
 
     cliente = relationship('Cliente')
-    
-class ItemVenda(Base):
-    __tablename__ = 'ItemVenda'
-    
-    id = Column(Integer, primary_key=True)
-    id_venda = Column(Integer, ForeignKey('Venda.id'))
-    id_produto = Column(Integer, ForeignKey('Produto.id'))
-    quantidade = Column(Integer, nullable=False)
-    preco_unitario = Column(Float, nullable=False)
-    
-    venda = relationship('Venda')
-    produto = relationship('Produto')
-    
+
 class Categoria(Base):
     __tablename__ = 'Categoria'
     
-    id = Column(Integer, primary_key=True)
+    id_categoria = Column(Integer, primary_key=True, autoincrement=True)
     nome = Column(String(50), nullable=False)
     descricao = Column(String(100), nullable=False)
     
+class Produto(Base):
+    __tablename__ = 'Produto'
+    
+    id_produto = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column(String(100), nullable=False)
+    descricao = Column(String(100), nullable=False)
+    preco = Column(Float, nullable=False)
+    id_categoria = Column(Integer, ForeignKey('Categoria.id_categoria'))
+    quantidade_estoque = Column(Integer, nullable=False)
+    
+    categoria = relationship('Categoria')
+
+class ItemVenda(Base):
+    __tablename__ = 'ItemVenda'
+    
+    id_item = Column(Integer, primary_key=True, autoincrement=True)
+    id_venda = Column(Integer, ForeignKey('Venda.id_venda'))
+    id_produto = Column(Integer, ForeignKey('Produto.id_produto'))
+    quantidade = Column(Integer, nullable=False)
+    preco_un = Column(Float, nullable=False)
+    
+    venda = relationship('Venda')
+    produto = relationship('Produto')
 
     
 #creating tables
@@ -99,7 +91,6 @@ Base.metadata.create_all(engine)
 #CREATE
 
 def criar_cliente():
-    cursor = db.connection.cursor()
     
     nome = input("Digite o nome do cliente: ")
     email = input("Digite o email do cliente: ")
@@ -110,10 +101,8 @@ def criar_cliente():
     session.add(cliente)
     session.commit()
     print('Cliente criado com sucesso!')
-    # cursor.close()
     
 def criar_produto():
-    cursor = db.connection.cursor()
 
     
     nome = input("Digite o nome do produto: ")
@@ -125,10 +114,7 @@ def criar_produto():
     session.commit()
     print('Produto criado com sucesso!')
     
-    cursor.close()
-    
 def criar_item_venda(id_venda, id_produto, quantidade, preco_unitario):
-    cursor = db.connection.cursor()
     
     item_venda = ItemVenda(id_venda=id_venda, id_produto=id_produto, quantidade=quantidade, preco_unitario=preco_unitario)
     
@@ -136,86 +122,57 @@ def criar_item_venda(id_venda, id_produto, quantidade, preco_unitario):
     session.commit()
     print('Item de venda criado com sucesso!')
     
-    cursor.close()
-    
 def criar_venda(data_venda, valor_total, cliente_id):
-    cursor = db.connection.cursor()
 
     
     #carregar a lista de produtos da venda por id
-    #item_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda).all()
+    
+    
+    item_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda).all()
+    
     
     
     data_venda = date.today()
-    cliente_id = input("Digite o id do cliente: ")
-    valor_total = sum([item.preco_unitario * item.quantidade for item in item_venda])
+    id_cliente = input("Digite o id do cliente: ")
+    valor_total = sum([item.preco_un * item.quantidade for item in item_venda])
     
-    venda = Venda(data_venda=data_venda, valor_total=valor_total, cliente_id=cliente_id)
+    venda = Venda(data_venda=data_venda, valor_total=valor_total, id_cliente=id_cliente)
     session.add(venda)
     session.commit()
     print('Venda criada com sucesso!')
-    
-    cursor.close()
-    
+     
 def criar_categoria(nome, descricao):
-    cursor = db.connection.cursor()
-    
     categoria = Categoria(nome=nome, descricao=descricao)
     session.add(categoria)
     session.commit()
     print('Categoria criada com sucesso!')
     
-    cursor.close()
     
 #READ
-def ler_clientes():
-    testar_conexao()
-    
-    cursor = db.connection.cursor()
-    
-    
-    cursor.execute('SELECT * FROM Cliente')
-    for linha in cursor.fetchall():
-        print(linha)
-        
-    cursor.close()
-        
-    #clientes = session.query(Cliente).all()
-    #for cliente in clientes:
-        #print(cliente.id, cliente.nome, cliente.email, cliente.telefone)
+def ler_clientes():   
+    clientes = session.query(Cliente).all()
+    for cliente in clientes:
+        print(f"ID: {cliente.id_cliente}, Nome: {cliente.nome}, Email: {cliente.email}, Telefone: {cliente.telefone}")
 
 def ler_produtos():
-    cursor = db.connection.cursor()
-
     produtos = session.query(Produto).all()
     for produto in produtos:
-        print(produto.id, produto.nome, produto.descricao, produto.preco)
-        
-    cursor.close()
+        print(produto.id_produto, produto.nome, produto.descricao, produto.preco)
 
-def ler_vendas():
-    cursor = db.connection.cursor()
-    
+def ler_vendas():    
     vendas = session.query(Venda).all()
     for venda in vendas:
-        print(venda.id, venda.data_venda, venda.valor_total, venda.cliente_id)
-        
-    cursor.close()
+        print(venda.id_venda, venda.data_venda, venda.valor_total, venda.id_cliente)       
         
 def ler_categorias():
-    cursor = db.connection.cursor()
-
     categorias = session.query(Categoria).all()
     for categoria in categorias:
-        print(categoria.id, categoria.nome, categoria.descricao)
+        print(categoria.id_categoria, categoria.nome, categoria.descricao)
     
-    cursor.close()
 
 #UPDATE
 def atualizar_cliente(id, nome, email, telefone):
-    cursor = db.connection.cursor()
-
-    cliente = session.query(Cliente).filter(Cliente.id == id).first()
+    cliente = session.query(Cliente).filter(Cliente.id_cliente == id).first()
     if cliente:
         cliente.nome = nome
         cliente.email = email
@@ -225,12 +182,9 @@ def atualizar_cliente(id, nome, email, telefone):
     else:
         print('Cliente não encontrado!')
         
-    cursor.close()
 
 def atualizar_produto(id, nome, descricao, preco):
-    cursor = db.connection.cursor()
-
-    produto = session.query(Produto).filter(Produto.id == id).first()
+    produto = session.query(Produto).filter(Produto.id_produto == id).first()
     if produto:
         produto.nome = nome
         produto.descricao = descricao
@@ -241,7 +195,7 @@ def atualizar_produto(id, nome, descricao, preco):
         print('Produto não encontrado!')
         
 def atualizar_categoria(id, nome, descricao):
-    categoria = session.query(Categoria).filter(Categoria.id == id).first()
+    categoria = session.query(Categoria).filter(Categoria.id_categoria == id).first()
     if categoria:
         categoria.nome = nome
         categoria.descricao = descricao
@@ -253,7 +207,7 @@ def atualizar_categoria(id, nome, descricao):
 #DELETE
 
 def deletar_cliente_por_id(id):
-    cliente = session.query(Cliente).filter(Cliente.id == id).first()
+    cliente = session.query(Cliente).filter(Cliente.id_cliente == id).first()
     if cliente:
         session.delete(cliente)
         session.commit()
@@ -271,7 +225,7 @@ def deletar_cliente_por_nome(nome):
         print('Cliente não encontrado!')
         
 def deletar_produto_por_id(id):
-    produto = session.query(Produto).filter(Produto.id == id).first()
+    produto = session.query(Produto).filter(Produto.id_produto == id).first()
     if produto:
         session.delete(produto)
         session.commit()
@@ -289,7 +243,7 @@ def deletar_produto_por_nome(nome):
         print('Produto não encontrado!')
         
 def deletar_venda(id):
-    venda = session.query(Venda).filter(Venda.id == id).first()
+    venda = session.query(Venda).filter(Venda.id_venda == id).first()
     if venda:
         session.delete(venda)
         session.commit()
@@ -298,7 +252,7 @@ def deletar_venda(id):
         print('Venda não encontrada!')
         
 def deletar_categoria_por_id(id):
-    categoria = session.query(Categoria).filter(Categoria.id == id).first()
+    categoria = session.query(Categoria).filter(Categoria.id_categoria == id).first()
     if categoria:
         session.delete(categoria)
         session.commit()
@@ -315,6 +269,6 @@ def deletar_categoria_por_nome(nome):
     else:
         print('Categoria não encontrada!')
         
-        
-# closing the connection
-# connection.close()
+#closing the connection
+
+connection.close()
