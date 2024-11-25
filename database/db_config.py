@@ -1,4 +1,4 @@
-import os
+# Description: This file is responsible for the database connection configuration.
 import mysql.connector
 
 # Connect to the database
@@ -9,4 +9,4 @@ connection = mysql.connector.connect(
     database= 'LojadeRoupas',
 )
 
-print(connection) # <mysql.connector.connection.MySQLConnection object at 0x7f8b3c1b3d30>
+database_url = "mysql+mysqlconnector://root:1703Lunna%40@127.0.0.1/LojaRoupas"
