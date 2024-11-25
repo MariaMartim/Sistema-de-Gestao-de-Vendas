@@ -96,7 +96,14 @@ def buscar_cliente():
         if escolha == 1:
             # Solicitar o ID do cliente
             id_cliente = int(input("Digite o ID do cliente: "))
-            return id_cliente
+            
+            #busca se o cliente existe
+            try:
+                cliente = session.query(Cliente).filter(Cliente.id_cliente == id_cliente).one()
+                return id_cliente
+            except NoResultFound:
+                print("Cliente não encontrado!")
+                return None
     
         elif escolha == 2:
             # Solicitar o nome do cliente
@@ -119,7 +126,14 @@ def buscar_produto():
         if escolha == 1:
             # Solicitar o ID do produto
             id_produto = int(input("Digite o ID do produto: "))
-            return id_produto
+            
+            #busca se o produto existe
+            try:
+                produto = session.query(Produto).filter(Produto.id_produto == id_produto).one()
+                return id_produto
+            except NoResultFound:
+                print("Produto não encontrado!")
+                return None
     
         elif escolha == 2:
             # Solicitar o nome do produto
@@ -144,6 +158,56 @@ def buscar_produto_por_id(id_produto):
         print("Produto não encontrado!")
         return None
     
+def buscar_categoria_por_id(id_categoria):
+    try:
+        # Buscar a categoria pelo ID
+        categoria = session.query(Categoria).filter(Categoria.id_categoria == id_categoria).one()
+        return categoria  # Retorna a categoria encontrada
+    except NoResultFound:
+        print("Categoria não encontrada!")
+        return None
+    
+def buscar_categoria():
+    escolha = input("Você deseja informar o ID ou o nome da categoria?: \n1) ID \n2)Nome ")
+
+    while True:
+        if escolha == 1:
+            # Solicitar o ID da categoria
+            id_categoria = int(input("Digite o ID da categoria: "))
+            
+            #busca se a categoria existe
+            try:
+                categoria = session.query(Categoria).filter(Categoria.id_categoria == id_categoria).one()
+                return id_categoria
+            except NoResultFound:
+                print("Categoria não encontrada!")
+                return None
+    
+        elif escolha == 2:
+            # Solicitar o nome da categoria
+            nome_categoria = input("Digite o nome da categoria: ").strip()
+
+            try:
+                # Buscar a categoria pelo nome (retorna a primeira categoria encontrada)
+                categoria = session.query(Categoria).filter(Categoria.nome == nome_categoria).one()
+                return categoria.id  # Retorna o ID da categoria encontrada
+            except NoResultFound:
+                print("Categoria não encontrada!")
+                return None
+        else:
+            print("Opção inválida!")
+            
+def buscar_venda():
+    # Solicitar o ID da venda
+    id_venda = int(input("Digite o ID da venda: "))
+    
+    #busca se a venda existe
+    try:
+        venda = session.query(Venda).filter(Venda.id_venda == id_venda).one()
+        return id_venda
+    except NoResultFound:
+        print("Venda não encontrada!")
+        return None
 
 #CRUD operations
 
@@ -168,6 +232,23 @@ def criar_produto():
     preco = input("Digite o preço do produto: ")
     estoque_quantidade = input("Digite a quantidade em estoque: ")
     
+    #mostrar as categorias disponíveis
+    categorias = session.query(Categoria).all()
+    for categoria in categorias:
+        print(f"{categoria.id_categoria}, {categoria.nome}")
+        
+    input_categoria = int(input("Digite o ID da categoria do produto: "))
+        
+    #laço para verificar se a categoria existe
+    while True:
+        try:
+            categoria = session.query(Categoria).filter(Categoria.id_categoria == input_categoria).one()
+            break
+        except NoResultFound:
+            print("Categoria não encontrada!")
+            input_categoria = int(input("Digite o ID da categoria do produto: "))
+    
+    
     #procurar se o produto já existe por nome
     produto = session.query(Produto).filter(Produto.nome == nome).first()
     if produto:
@@ -175,7 +256,7 @@ def criar_produto():
         return
 
     else:
-        produto = Produto(nome=nome, descricao=descricao, preco=preco, estoque_quantidade=estoque_quantidade)
+        produto = Produto(nome=nome, descricao=descricao, preco=preco, estoque_quantidade=estoque_quantidade, id_categoria=input_categoria)
         session.add(produto)
         session.commit()
         print('Produto criado com sucesso!')
@@ -219,7 +300,7 @@ def criar_venda():
                 continue
             
             #criar o item de venda
-            item_venda = ItemVenda(id_venda=venda.id_venda, id_produto=id_produto, quantidade=quantidade, preco_unitario=preco_unitario)
+            item_venda = ItemVenda(id_venda=venda.id_venda, id_produto=id_produto, quantidade=quantidade, preco_unitario=produto.preco)
             itens_venda.append(item_venda)
             
             #atualizar o valor total da venda
@@ -251,8 +332,11 @@ def ler_clientes():
 
 def ler_produtos():
     produtos = session.query(Produto).all()
+    #pegar o id da categoria do produto e mostrar o nome da categoria    
+    
     for produto in produtos:
-        print(f"ID: {produto.id_produto}, Nome do produto: {produto.nome}, Descricao do produto: {produto.descricao}, Preco do produto: {produto.preco}, Estoque do produto: {produto.estoque_quantidade}")
+        categoria = session.query(Categoria).filter(Categoria.id_categoria == produto.id_categoria).first()
+        print(f"ID: {produto.id_produto}, Nome do produto: {produto.nome}, Descricao do produto: {produto.descricao}, Preco do produto: {produto.preco}, ID da categoria: {produto.id_categoria}")
 
 def ler_vendas():    
     vendas = session.query(Venda).all()
@@ -278,12 +362,24 @@ def atualizar_cliente(id, nome, email, telefone):
         print('Cliente não encontrado!')
         
 
-def atualizar_produto(id, nome, descricao, preco):
+def atualizar_produto(id, nome, descricao, preco, estoque_quantidade, id_categoria):
     produto = session.query(Produto).filter(Produto.id_produto == id).first()
     if produto:
         produto.nome = nome
         produto.descricao = descricao
         produto.preco = preco
+        produto.estoque_quantidade = estoque_quantidade
+        produto.id_categoria = id_categoria
+        
+        while True:
+            
+            #verificação se a categoria existe
+            if session.query(Categoria).filter(Categoria.id_categoria == id_categoria).first() is None:
+                print('Categoria não encontrada!')
+                id_categoria = int(input("Digite o ID da categoria do produto: "))
+            else:
+                break
+            
         session.commit()
         print('Produto atualizado com sucesso!')
     else:
