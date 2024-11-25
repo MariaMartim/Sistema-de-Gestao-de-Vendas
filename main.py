@@ -208,8 +208,6 @@ def menu_delete():
             break
         else:
             print("Opção inválida!")
-    
-    
 
 def menu():
     while True:

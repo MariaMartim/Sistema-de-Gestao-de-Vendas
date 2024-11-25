@@ -219,8 +219,20 @@ def criar_cliente():
     email = input("Digite o email do cliente: ")
     telefone = input("Digite o telefone do cliente: ")
     endereco = input("Digite o endereço do cliente: ")
+     
+    #pedir id da categoria e verificar se a categoria existe
+    categorias = session.query(Categoria).all()
+    for categoria in categorias:
+        print(f"{categoria.id_categoria}, {categoria.nome}")
     
-    cliente = Cliente(nome=nome, email=email, telefone=telefone, endereco=endereco)
+    while True:
+        id_categoria = int(input("Digite o ID da categoria do cliente: "))
+        if session.query(Categoria).filter(Categoria.id_categoria == id_categoria).first() is None:
+            print('Categoria não encontrada!')
+        else:
+            break
+    
+    cliente = Cliente(nome=nome, email=email, telefone=telefone, endereco=endereco, id_categoria=id_categoria)
     session.add(cliente)
     session.commit()
     print('Cliente criado com sucesso!')
@@ -237,8 +249,6 @@ def criar_produto():
     for categoria in categorias:
         print(f"{categoria.id_categoria}, {categoria.nome}")
         
-    input_categoria = int(input("Digite o ID da categoria do produto: "))
-        
     #laço para verificar se a categoria existe
     while True:
         try:
@@ -249,17 +259,20 @@ def criar_produto():
             input_categoria = int(input("Digite o ID da categoria do produto: "))
     
     
-    #procurar se o produto já existe por nome
-    produto = session.query(Produto).filter(Produto.nome == nome).first()
-    if produto:
-        print('O produto com este nome já existe!')
-        return
-
-    else:
-        produto = Produto(nome=nome, descricao=descricao, preco=preco, estoque_quantidade=estoque_quantidade, id_categoria=input_categoria)
-        session.add(produto)
-        session.commit()
-        print('Produto criado com sucesso!')
+    #laço para procurar se o produto já existe por nome e pedir novamente se já existir
+    while True:
+        try:
+            produto = session.query(Produto).filter(Produto.nome == nome).one()
+            print("Produto já existe!")
+            nome = input("Digite o nome do produto: ")
+        except NoResultFound:
+            break
+    
+    #criar o produto
+    produto = Produto(nome=nome, descricao=descricao, preco=preco, estoque_quantidade=estoque_quantidade, id_categoria=input_categoria)
+    session.add(produto)
+    session.commit()
+    print('Produto criado com sucesso!')
     
 def criar_item_venda(id_venda, id_produto, quantidade, preco_unitario):
     
@@ -341,7 +354,11 @@ def ler_produtos():
 def ler_vendas():    
     vendas = session.query(Venda).all()
     for venda in vendas:
-        print(f"{venda.id_venda}, {venda.data_venda}, {venda.valor_total}, {venda.id_cliente}")       
+        print(f"ID da venda: {venda.id_venda}, Data da venda: {venda.data_venda}, Valor total: {venda.valor_total}, ID do cliente: {venda.id_cliente}")      
+        #mostrar os itens da venda
+        itens_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == venda.id_venda).all()
+        for item in itens_venda:
+            print(f"    ID do produto: {item.id_produto}, Quantidade: {item.quantidade}, Preco unitario: {item.preco_un}") 
         
 def ler_categorias():
     categorias = session.query(Categoria).all()
@@ -462,5 +479,4 @@ def deletar_categoria_por_nome(nome):
 
         
 #closing the connection
-
 connection.close()
