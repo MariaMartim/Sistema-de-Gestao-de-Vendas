@@ -68,70 +68,17 @@ def menu_update():
         op = int(input("Digite a opção desejada: "))
     
         if op == 1:
-            while True:
-                #buscar o cliente primeiro
-                id_cliente = c.buscar_cliente()
-                
-                #se existir, atualizar
-                if id_cliente:
-                    nome = input("\n Digite o novo nome \n")
-                    email = input("Digite o novo email \n")
-                    telefone = input("Digite o novo telefone \n")
-                    endereco = input("Digite o novo endereço \n")
-                    c.atualizar_cliente(nome, email, telefone, endereco)
-                    break
-                else:
-                    break
-            
+            c.atualizar_cliente()
+            break
         elif op == 2:
-            while True:
-                #buscar o produto primeiro
-                id_produto = c.buscar_produto()
-                
-                #se existir, atualizar
-                if id_produto: 
-                    nome = input("\n Digite o novo nome \n")
-                    descricao = input("Digite a nova descricao \n")
-                    preco = input("Digite o novo preco \n")
-                    quantidade_estoque = input("Digite a quantidade em estoque \n")
-                    id_categoria = input("Digite o id da categoria \n")
-                    
-                    c.atualizar_produto(id_produto, nome, descricao, preco, quantidade_estoque, id_categoria)
-                    break
-                else:
-                    break
-                
+            c.atualizar_produto()
+            break
         elif op == 3:
-            while True:
-                #buscar a categoria primeiro
-                id_categoria = c.buscar_categoria()
-                
-                #se existir, atualizar
-                if id_categoria: 
-                    nome = input("\n Digite o novo nome \n")
-                    descricao = input("Digite a nova descricao \n")
-                    
-                    c.atualizar_categoria(id_categoria, nome, descricao)
-                    break
-                else:
-                    break
-                
+            c.atualizar_categoria()
+            break
         elif op == 4:
-            
-            while True:
-                #buscar a venda primeiro
-                id_venda = c.buscar_venda()
-                
-                #se existir, atualizar
-                if id_venda: 
-                    id_cliente = input("\n Digite o id do cliente \n")
-                    data = input("Digite a nova data \n")
-                    valor_total = input("Digite o novo valor total \n")
-                    
-                    c.atualizar_venda(id_venda, id_cliente, data, valor_total)
-                    break
-                else:
-                    break
+            c.atualizar_venda()
+            break
         elif op == 0:
             break
         else:

@@ -221,20 +221,8 @@ def criar_cliente():
     email = input("Digite o email do cliente: ")
     telefone = input("Digite o telefone do cliente: ")
     endereco = input("Digite o endereço do cliente: ")
-     
-    #pedir id da categoria e verificar se a categoria existe
-    categorias = session.query(Categoria).all()
-    for categoria in categorias:
-        print(f"{categoria.id_categoria}, {categoria.nome}")
     
-    while True:
-        id_categoria = int(input("Digite o ID da categoria do cliente: "))
-        if session.query(Categoria).filter(Categoria.id_categoria == id_categoria).first() is None:
-            print('Categoria não encontrada!')
-        else:
-            break
-    
-    cliente = Cliente(nome=nome, email=email, telefone=telefone, endereco=endereco, id_categoria=id_categoria)
+    cliente = Cliente(nome=nome, email=email, telefone=telefone, endereco=endereco)
     session.add(cliente)
     session.commit()
     print('Cliente criado com sucesso!')
@@ -254,6 +242,7 @@ def criar_produto():
     #laço para verificar se a categoria existe
     while True:
         try:
+            input_categoria = int(input("Digite o ID da categoria do produto: "))
             categoria = session.query(Categoria).filter(Categoria.id_categoria == input_categoria).one()
             break
         except NoResultFound:
@@ -342,14 +331,17 @@ def criar_venda():
                     print('Venda finalizada!')
                     break
      
-def criar_categoria(nome, descricao):
+def criar_categoria():
+    nome = input("Digite o nome da categoria: ")
+    descricao = input("Digite a descrição da categoria: ")
+    
     categoria = Categoria(nome=nome, descricao=descricao)
     session.add(categoria)
     session.commit()
     print('Categoria criada com sucesso!')
     
-    
 #READ
+
 def ler_clientes():   
     clientes = session.query(Cliente).all()
     for cliente in clientes:
@@ -377,55 +369,156 @@ def ler_categorias():
     for categoria in categorias:
         print(f"{categoria.id_categoria}, {categoria.nome}, {categoria.descricao}")
     
-
 #UPDATE
-def atualizar_cliente(id, nome, email, telefone):
-    cliente = session.query(Cliente).filter(Cliente.id_cliente == id).first()
-    if cliente:
-        cliente.nome = nome
-        cliente.email = email
-        cliente.telefone = telefone
-        session.commit()
-        print('Cliente atualizado com sucesso!')
+
+def atualizar_cliente():
+    id_cliente = buscar_cliente()
+    
+    if id_cliente is None:
+        return
     else:
-        print('Cliente não encontrado!')
+        #mostrar o cliente
+        cliente = session.query(Cliente).filter(Cliente.id_cliente == id_cliente).first()
+        print(f"ID: {cliente.id_cliente}, Nome: {cliente.nome}, Email: {cliente.email}, Telefone: {cliente.telefone}")
+        
+        #o que deseja atualizar?
+        while True:
+            print("O que deseja atualizar?")
+            print("1 - Nome")
+            print("2 - Email")
+            print("3 - Telefone")
+            print("4 - Endereço")
+            print("0 - Voltar")
+            
+            op = int(input("Digite a opção desejada: "))
+            
+            if op == 1:
+                nome = input("Digite o novo nome: ")
+                cliente.nome = nome
+                session.commit()
+                print('Nome atualizado com sucesso!')
+            elif op == 2:
+                email = input("Digite o novo email: ")
+                cliente.email = email
+                session.commit()
+                print('Email atualizado com sucesso!')
+            elif op == 3:
+                telefone = input("Digite o novo telefone: ")
+                cliente.telefone = telefone
+                session.commit()
+                print('Telefone atualizado com sucesso!')
+            elif op == 4:
+                endereco = input("Digite o novo endereço: ")
+                cliente.endereco = endereco
+                session.commit()
+                print('Endereço atualizado com sucesso!')
+            elif op == 0:
+                break
+            else:
+                print("Opção inválida!")
         
 
-def atualizar_produto(id, nome, descricao, preco, estoque_quantidade, id_categoria):
-    produto = session.query(Produto).filter(Produto.id_produto == id).first()
-    if produto:
-        produto.nome = nome
-        produto.descricao = descricao
-        produto.preco = preco
-        produto.estoque_quantidade = estoque_quantidade
-        produto.id_categoria = id_categoria
+def atualizar_produto():
+    id_produto = buscar_produto()
+    
+    if id_produto is None:
+        return
+    else:
+        #mostrar o produto
+        produto = session.query(Produto).filter(Produto.id_produto == id_produto).first()
+        print(f"ID: {produto.id_produto}, Nome: {produto.nome}, Descrição: {produto.descricao}, Preço: {produto.preco}, Quantidade em estoque: {produto.estoque_quantidade}")
         
+        #o que deseja atualizar?
         while True:
+            print("O que deseja atualizar?")
+            print("1 - Nome")
+            print("2 - Descrição")
+            print("3 - Preço")
+            print("4 - Quantidade em estoque")
+            print("5 - Categoria")
+            print("0 - Voltar")
             
-            #verificação se a categoria existe
-            if session.query(Categoria).filter(Categoria.id_categoria == id_categoria).first() is None:
-                print('Categoria não encontrada!')
-                id_categoria = int(input("Digite o ID da categoria do produto: "))
-            else:
+            op = int(input("Digite a opção desejada: "))
+            
+            if op == 1:
+                nome = input("Digite o novo nome: ")
+                produto.nome = nome
+                session.commit()
+                print('Nome atualizado com sucesso!')
+            elif op == 2:
+                descricao = input("Digite a nova descrição: ")
+                produto.descricao = descricao
+                session.commit()
+                print('Descrição atualizada com sucesso!')
+            elif op == 3:
+                preco = input("Digite o novo preço: ")
+                produto.preco = preco
+                session.commit()
+                print('Preço atualizado com sucesso!')
+            elif op == 4:
+                estoque_quantidade = input("Digite a nova quantidade em estoque: ")
+                produto.estoque_quantidade = estoque_quantidade
+                session.commit()
+                print('Quantidade em estoque atualizada com sucesso!')
+            elif op == 5:
+                #mostrar as categorias disponíveis
+                categorias = session.query(Categoria).all()
+                for categoria in categorias:
+                    print(f"{categoria.id_categoria}, {categoria.nome}")
+                    
+                #laço para verificar se a categoria existe
+                while True:
+                    try:
+                        input_categoria = int(input("Digite o ID da categoria do produto: "))
+                        categoria = session.query(Categoria).filter(Categoria.id_categoria == input_categoria).one()
+                        break
+                    except NoResultFound:
+                        print("Categoria não encontrada!")
+                        input_categoria = int(input("Digite o ID da categoria do produto: "))
+                
+                produto.id_categoria = input_categoria
+                session.commit()
+                print('Categoria atualizada com sucesso!')
+            elif op == 0:
                 break
-            
-        session.commit()
-        print('Produto atualizado com sucesso!')
-    else:
-        print('Produto não encontrado!')
         
-def atualizar_categoria(id, nome, descricao):
-    categoria = session.query(Categoria).filter(Categoria.id_categoria == id).first()
-    if categoria:
-        categoria.nome = nome
-        categoria.descricao = descricao
-        session.commit()
-        print('Categoria atualizada com sucesso!')
+def atualizar_categoria():
+    id_categoria = buscar_categoria()
+    
+    if id_categoria is None:
+        return
     else:
-        print('Categoria não encontrada!')
+        #mostrar a categoria
+        categoria = session.query(Categoria).filter(Categoria.id_categoria == id_categoria).first()
+        print(f"ID: {categoria.id_categoria}, Nome: {categoria.nome}, Descrição: {categoria.descricao}")
+        
+        #o que deseja atualizar?
+        while True:
+            print("O que deseja atualizar?")
+            print("1 - Nome")
+            print("2 - Descrição")
+            print("0 - Voltar")
+            
+            op = int(input("Digite a opção desejada: "))
+            
+            if op == 1:
+                nome = input("Digite o novo nome: ")
+                categoria.nome = nome
+                session.commit()
+                print('Nome atualizado com sucesso!')
+            elif op == 2:
+                descricao = input("Digite a nova descrição: ")
+                categoria.descricao = descricao
+                session.commit()
+                print('Descrição atualizada com sucesso!')
+            elif op == 0:
+                break
+            else:
+                print("Opção inválida!")
         
 def atualizar_venda():
     id_venda = buscar_venda()
+    
     if id_venda is None:
         return # Retorna caso a venda não seja encontrada
     else:
@@ -443,16 +536,19 @@ def atualizar_venda():
             print("O que deseja atualizar?")
             print("1 - Cliente")
             print("2 - Itens da venda")
-            print("3 - Valor total")
             print("0 - Voltar")
             
             op = int(input("Digite a opção desejada: "))
             
             if op == 1:
-                id_cliente = int(input("Digite o ID do cliente: "))
-                venda.id_cliente = id_cliente
-                session.commit()
-                print('Cliente atualizado com sucesso!')
+                id_cliente = buscar_cliente()
+                
+                if id_cliente is None:
+                    return # Retorna caso o cliente não seja encontrado
+                else:
+                    venda.id_cliente = id_cliente
+                    session.commit()
+                    print('Cliente atualizado com sucesso!')
             elif op == 2:
                 #atualizar os itens da venda
                 #deseja remover, adicionar ou atualizar a quantidade?
@@ -466,12 +562,12 @@ def atualizar_venda():
                     op = int(input("Digite a opção desejada: "))
                     
                     if op == 1:
-                        id_produto = int(input("Digite o ID do produto: "))
-                        quantidade = int(input("Digite a quantidade: "))
-                        
-                        #pegar o preço unitário do produto
+                        id_produto = buscar_produto()
                         produto = session.query(Produto).filter(Produto.id_produto == id_produto).first()
                         preco_unitario = produto.preco
+                        
+                        
+                        quantidade = int(input("Digite a quantidade: "))
                         
                         #verificar se o produto já existe na venda
                         item_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda, ItemVenda.id_produto == id_produto).first()
@@ -483,13 +579,23 @@ def atualizar_venda():
                             print('Quantidade atualizada com sucesso!')
                         else:
                             criar_item_venda(id_venda, id_produto, quantidade, preco_unitario)
+                            session.commit()
                     
                     elif op == 2:
-                        id_produto = int(input("Digite o ID do produto: "))
+                        id_produto = buscar_produto()
                         quantidade = int(input("Digite a quantidade: "))
-                        deletar_item_venda(id_venda, id_produto, quantidade)
+                        
+                        #verificar se o produto existe na venda
+                        item_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda, ItemVenda.id_produto == id_produto).first()
+                        if item_venda:
+                            deletar_item_venda(id_venda, id_produto, quantidade)
+                            session.commit()
+                            print('Item removido com sucesso!')
+                        else:
+                            print('Item não encontrado na venda!')
+                        
                     elif op == 3:
-                        id_produto = int(input("Digite o ID do produto: "))
+                        id_produto = buscar_produto()
                         quantidade = int(input("Digite a nova quantidade: "))
                         
                         #verificar se o produto existe na venda
@@ -499,11 +605,16 @@ def atualizar_venda():
                             session.commit()
                             print('Quantidade atualizada com sucesso!')
                         else:
-                            print('Item não encontrado!')
+                            print('Item não encontrado na venda!')
                     elif op == 0:
                         break
                     else:
                         print("Opção inválida!")
+            elif op == 0:
+                break
+            else:
+                print("Opção inválida!")
+                        
 #DELETE
 
 def deletar_cliente(id):
@@ -561,7 +672,6 @@ def deletar_categoria(id):
         print('Categoria deletada com sucesso!')
     else:
         print('Categoria não encontrada!')
-
         
 #closing the connection
 connection.close()
