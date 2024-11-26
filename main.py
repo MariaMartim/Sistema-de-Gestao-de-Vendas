@@ -69,13 +69,19 @@ def menu_update():
     
         if op == 1:
             while True:
-                nome = input("\n Digite o novo nome \n")
-                email = input("Digite o novo email \n")
-                telefone = input("Digite o novo telefone \n")
-                endereco = input("Digite o novo endereço \n")
-                c.atualizar_cliente(nome, email, telefone, endereco)
+                #buscar o cliente primeiro
+                id_cliente = c.buscar_cliente()
                 
-                print("Cliente atualizado com sucesso!")
+                #se existir, atualizar
+                if id_cliente:
+                    nome = input("\n Digite o novo nome \n")
+                    email = input("Digite o novo email \n")
+                    telefone = input("Digite o novo telefone \n")
+                    endereco = input("Digite o novo endereço \n")
+                    c.atualizar_cliente(nome, email, telefone, endereco)
+                    break
+                else:
+                    break
             
         elif op == 2:
             
@@ -92,10 +98,8 @@ def menu_update():
                     id_categoria = input("Digite o id da categoria \n")
                     
                     c.atualizar_produto(id_produto, nome, descricao, preco, quantidade_estoque, id_categoria)
-                    
-                    print("Produto atualizado com sucesso!")
+                    break
                 else:
-                    print("Produto não encontrado")
                     break
         elif op == 3:
             
@@ -109,10 +113,8 @@ def menu_update():
                     descricao = input("Digite a nova descricao \n")
                     
                     c.atualizar_categoria(id_categoria, nome, descricao)
-                    
-                    print("Categoria atualizada com sucesso!")
+                    break
                 else:
-                    print("Categoria não encontrada")
                     break
         elif op == 4:
             
@@ -127,10 +129,8 @@ def menu_update():
                     valor_total = input("Digite o novo valor total \n")
                     
                     c.atualizar_venda(id_venda, id_cliente, data, valor_total)
-                    
-                    print("Venda atualizada com sucesso!")
+                    break
                 else:
-                    print("Venda não encontrada")
                     break
         elif op == 0:
             break
@@ -141,7 +141,7 @@ def menu_update():
 def menu_delete():
     
     while True:
-        print("\n O que deseja apagar? \n")
+        print("\n O que deseja remover? \n")
         print("1 - Cliente")
         print("2 - Produto")
         print("3 - Categoria")
@@ -159,10 +159,8 @@ def menu_delete():
                 #se existir, deletar
                 if id_cliente: 
                     c.deletar_cliente(id_cliente)
-                    
-                    print("Cliente deletado com sucesso!")
+                    break
                 else:
-                    print("Cliente não encontrado")
                     break
         elif op == 2:
             
@@ -173,10 +171,8 @@ def menu_delete():
                 #se existir, deletar
                 if id_produto: 
                     c.deletar_produto(id_produto)
-                    
-                    print("Produto deletado com sucesso!")
+                    break
                 else:
-                    print("Produto não encontrado")
                     break
         elif op == 3:
             
@@ -187,10 +183,9 @@ def menu_delete():
                 #se existir, deletar
                 if id_categoria: 
                     c.deletar_categoria(id_categoria)
-                    
-                    print("Categoria deletada com sucesso!")
+                    break
                 else:
-                    print("Categoria não encontrada")
+                    break
         elif op == 4:
             
             while True:
@@ -200,10 +195,9 @@ def menu_delete():
                 #se existir, deletar
                 if id_venda: 
                     c.deletar_venda(id_venda)
-                    
-                    print("Venda deletada com sucesso!")
+                    break
                 else:
-                    print("Venda não encontrada")
+                    break
         elif op == 0:
             break
         else:
