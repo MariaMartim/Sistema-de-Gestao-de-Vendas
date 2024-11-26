@@ -17,5 +17,5 @@ Este projeto é um sistema de gestão de vendas que utiliza Python e SQLAlchemy 
 - **Banco de Dados**: MySQL
 - **Bibliotecas Python**:
   - `mysql-connector-python` para conexão com o MySQL.
-  - `sqlalchemy` para abstração de comandos em linguagem sql no código.
+  - `sqlalchemy` para abstração de comandos em linguagem SQL no código.
   - `datetime` para utilizar datas associadas aos dados.
