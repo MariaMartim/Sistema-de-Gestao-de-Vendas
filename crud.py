@@ -90,7 +90,7 @@ Base.metadata.create_all(engine)
 
 #funções para realizar as operações de CRUD
 def buscar_cliente():
-    escolha = input("Você deseja informar o ID ou o nome do cliente?: \n1) ID \n2)Nome ")
+    escolha = int(input("Você deseja informar o ID ou o nome do cliente?: \n1) ID \n2)Nome \n"))
 
     while True:
         if escolha == 1:
@@ -120,7 +120,7 @@ def buscar_cliente():
             print("Opção inválida!")
         
 def buscar_produto():
-    escolha = input("Você deseja informar o ID ou o nome do produto?: \n1) ID \n2)Nome ")
+    escolha = int(input("Você deseja informar o ID ou o nome do produto?: \n1) ID \n2)Nome \n"))
 
     while True:
         if escolha == 1:
@@ -283,22 +283,24 @@ def criar_item_venda(id_venda, id_produto, quantidade, preco_unitario):
     print('Item de venda criado com sucesso!')
     
 def criar_venda():
-    #criar a venda
-    venda = Venda(id_cliente=id_cliente, valor_total=0.0, data_venda=date.today())
-    session.add(venda)
-    session.commit() #salvar a venda no banco de dados para obter o id
+    #registrar um cliente
+    id_cliente = buscar_cliente()
     
     #calcular o valor total da venda
     total = 0.0
+    
     #lista de itens de venda
     itens_venda =[]
-    
-    id_cliente = buscar_cliente()
     
     if id_cliente is None:
         return # Retorna caso o cliente não seja encontrado
     else:
         while True:
+            #criar a venda
+            venda = Venda(id_cliente=id_cliente, valor_total=0.0, data_venda=date.today())
+            session.add(venda)
+            session.commit() #salvar a venda no banco de dados para obter o id
+            
             id_produto = int(input("Digite o ID do produto: "))
             quantidade = int(input("Digite a quantidade: "))
             
@@ -412,9 +414,89 @@ def atualizar_categoria(id, nome, descricao):
     else:
         print('Categoria não encontrada!')
         
+def atualizar_venda():
+    id_venda = buscar_venda()
+    if id_venda is None:
+        return # Retorna caso a venda não seja encontrada
+    else:
+        #mostra a venda
+        venda = session.query(Venda).filter(Venda.id_venda == id_venda).first()
+        print(f"ID da venda: {venda.id_venda}, Data da venda: {venda.data_venda}, Valor total: {venda.valor_total}, ID do cliente: {venda.id_cliente}")
+        
+        #mostrar os itens da venda
+        itens_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda).all()
+        for item in itens_venda:
+            print(f"    ID do produto: {item.id_produto}, Quantidade: {item.quantidade}, Preco unitario: {item.preco_un}")
+            
+        #o que deseja atualizar?
+        while True:
+            print("O que deseja atualizar?")
+            print("1 - Cliente")
+            print("2 - Itens da venda")
+            print("3 - Valor total")
+            print("0 - Voltar")
+            
+            op = int(input("Digite a opção desejada: "))
+            
+            if op == 1:
+                id_cliente = int(input("Digite o ID do cliente: "))
+                venda.id_cliente = id_cliente
+                session.commit()
+                print('Cliente atualizado com sucesso!')
+            elif op == 2:
+                #atualizar os itens da venda
+                #deseja remover, adicionar ou atualizar a quantidade?
+                while True:
+                    print("O que deseja fazer com os itens da venda?")
+                    print("1 - Adicionar item")
+                    print("2 - Remover item")
+                    print("3 - Atualizar quantidade")
+                    print("0 - Voltar")
+                    
+                    op = int(input("Digite a opção desejada: "))
+                    
+                    if op == 1:
+                        id_produto = int(input("Digite o ID do produto: "))
+                        quantidade = int(input("Digite a quantidade: "))
+                        
+                        #pegar o preço unitário do produto
+                        produto = session.query(Produto).filter(Produto.id_produto == id_produto).first()
+                        preco_unitario = produto.preco
+                        
+                        #verificar se o produto já existe na venda
+                        item_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda, ItemVenda.id_produto == id_produto).first()
+                        
+                        #se o produto já existe na venda, atualizar a quantidade, se não, criar o novo item na venda
+                        if item_venda:
+                            item_venda.quantidade += quantidade
+                            session.commit()
+                            print('Quantidade atualizada com sucesso!')
+                        else:
+                            criar_item_venda(id_venda, id_produto, quantidade, preco_unitario)
+                    
+                    elif op == 2:
+                        id_produto = int(input("Digite o ID do produto: "))
+                        quantidade = int(input("Digite a quantidade: "))
+                        deletar_item_venda(id_venda, id_produto, quantidade)
+                    elif op == 3:
+                        id_produto = int(input("Digite o ID do produto: "))
+                        quantidade = int(input("Digite a nova quantidade: "))
+                        
+                        #verificar se o produto existe na venda
+                        item_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda, ItemVenda.id_produto == id_produto).first()
+                        if item_venda:
+                            item_venda.quantidade = quantidade
+                            session.commit()
+                            print('Quantidade atualizada com sucesso!')
+                        else:
+                            print('Item não encontrado!')
+                    elif op == 0:
+                        break
+                    else:
+                        print("Opção inválida!")
 #DELETE
 
-def deletar_cliente_por_id(id):
+def deletar_cliente(id):
     cliente = session.query(Cliente).filter(Cliente.id_cliente == id).first()
     if cliente:
         session.delete(cliente)
@@ -423,16 +505,7 @@ def deletar_cliente_por_id(id):
     else:
         print('Cliente não encontrado!')
         
-def deletar_cliente_por_nome(nome):
-    cliente = session.query(Cliente).filter(Cliente.nome == nome).first()
-    if cliente:
-        session.delete(cliente)
-        session.commit()
-        print('Cliente deletado com sucesso!')
-    else:
-        print('Cliente não encontrado!')
-        
-def deletar_produto_por_id(id):
+def deletar_produto(id):
     produto = session.query(Produto).filter(Produto.id_produto == id).first()
     if produto:
         session.delete(produto)
@@ -441,35 +514,37 @@ def deletar_produto_por_id(id):
     else:
         print('Produto não encontrado!')
         
-def deletar_produto_por_nome(nome):
-    produto = session.query(Produto).filter(Produto.nome == nome).first()
-    if produto:
-        session.delete(produto)
-        session.commit()
-        print('Produto deletado com sucesso!')
+def deletar_item_venda(id_venda, id_produto, quantidade):
+    item_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda, ItemVenda.id_produto == id_produto).first()
+    #verificar se o item existe
+    if item_venda:
+        #verificar se a quantidade a ser removida é menor que a quantidade do item
+        if item_venda.quantidade > quantidade:
+            item_venda.quantidade -= quantidade
+            session.commit()
+            print('Quantidade atualizada com sucesso!')
+        else:
+            session.delete(item_venda)
+            session.commit()
+            print('Item deletado com sucesso!')
     else:
-        print('Produto não encontrado!')
+        print('Item não encontrado na venda!')
         
 def deletar_venda(id):
     venda = session.query(Venda).filter(Venda.id_venda == id).first()
     if venda:
+        #apaagar os itens da venda
+        itens_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id).all()
+        for item in itens_venda:
+            session.delete(item)
         session.delete(venda)
         session.commit()
         print('Venda deletada com sucesso!')
     else:
         print('Venda não encontrada!')
         
-def deletar_categoria_por_id(id):
+def deletar_categoria(id):
     categoria = session.query(Categoria).filter(Categoria.id_categoria == id).first()
-    if categoria:
-        session.delete(categoria)
-        session.commit()
-        print('Categoria deletada com sucesso!')
-    else:
-        print('Categoria não encontrada!')
-        
-def deletar_categoria_por_nome(nome):
-    categoria = session.query(Categoria).filter(Categoria.nome == nome).first()
     if categoria:
         session.delete(categoria)
         session.commit()
