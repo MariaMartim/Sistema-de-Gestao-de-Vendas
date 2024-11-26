@@ -9,31 +9,33 @@ from datetime import date
 
 connection = db.connection
 
+# `create_engine` é usado para estabelecer a conexão com o banco de dados.
+# Ele cria um objeto que gerencia a comunicação com o banco especificado por sua URI.
+# Aqui, estamos configurando para usar mysql como banco de dados, que se encontram no arquivo db_config.py
 engine = create_engine(db.database_url)
+# `declarative_base` é uma classe base fornecida pelo ORM do SQLAlchemy.
+# Ela permite que as classes Python sejam associadas a tabelas no banco de dados.
 Base = declarative_base()
+# `sessionmaker` cria um gerenciador de sessões.
+# Ele facilita transações e operações no banco de dados, mantendo a consistência.
 Session = sessionmaker(bind=engine)
+# Início de uma nova sessão.
+# A sessão gerencia todas as operações no banco como inserções, consultas, atualizações e exclusões.
+# Ela é executada sempre que uma operação é realizada no banco de dados.
 session = Session()
 
-def testar_conexao():
-    try:
-        # Verificando se a conexão foi bem-sucedida
-        if db.connection.is_connected():
-            print("Conexão bem-sucedida com o banco de dados!")
-            db_info = db.connection.get_server_info()
-            print("Versão do servidor MySQL:", db_info)
-            return True  # Retorna True para indicar que a conexão foi bem-sucedida
+#Exemplo de uso
+# - Inserção: session.add(objeto) e session.commit()
 
-    except Error as err:
-        print("Erro ao conectar ao banco de dados:", err)
-        return False  # Retorna False caso haja erro na conexão
+# - Consulta: session.query(Classe).all() ou session.query(Classe).filter(Classe.atributo == valor).all()
 
-    finally:
-        if db.connection.is_connected():
-            db.connection.close()  # Fecha a conexão
-            print("Conexão com o MySQL encerrada.")
-            
+# - Atualização: objeto.atributo = novo_valor e session.commit()
+
+# - Remoção: session.delete(objeto) e session.commit()
+
 
 #Modelos
+#criar as classes Cliente, Venda, Categoria, Produto e ItemVenda
 class Cliente(Base):
     __tablename__ = 'Cliente'
     
@@ -85,7 +87,7 @@ class ItemVenda(Base):
     produto = relationship('Produto')
 
     
-#creating tables
+#criar as tabelas
 Base.metadata.create_all(engine)
 
 #funções para realizar as operações de CRUD
@@ -99,7 +101,7 @@ def buscar_cliente():
             
             #busca se o cliente existe
             try:
-                cliente = session.query(Cliente).filter(Cliente.id_cliente == id_cliente).one()
+                cliente = session.query(Cliente).filter(Cliente.id_cliente == id_cliente).one() 
                 return id_cliente
             except NoResultFound:
                 print("Cliente não encontrado!")
