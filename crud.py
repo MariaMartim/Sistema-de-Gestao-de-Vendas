@@ -112,7 +112,7 @@ def buscar_cliente():
             try:
                 # Buscar o cliente pelo nome (retorna o primeiro cliente encontrado)
                 cliente = session.query(Cliente).filter(Cliente.nome == nome_cliente).one()
-                return cliente.id  # Retorna o ID do cliente encontrado
+                return cliente.id_cliente  # Retorna o ID do cliente encontrado
             except NoResultFound:
                 print("Cliente não encontrado!")
                 return None
@@ -142,7 +142,7 @@ def buscar_produto():
             try:
                 # Buscar o produto pelo nome (retorna o primeiro produto encontrado)
                 produto = session.query(Produto).filter(Produto.nome == nome_produto).one()
-                return produto.id  # Retorna o ID do produto encontrado
+                return produto.id_produto  # Retorna o ID do produto encontrado
             except NoResultFound:
                 print("Produto não encontrado!")
                 return None
@@ -295,42 +295,50 @@ def criar_venda():
     if id_cliente is None:
         return # Retorna caso o cliente não seja encontrado
     else:
-        while True:
             #criar a venda
             venda = Venda(id_cliente=id_cliente, valor_total=0.0, data_venda=date.today())
             session.add(venda)
             session.commit() #salvar a venda no banco de dados para obter o id
             
-            id_produto = int(input("Digite o ID do produto: "))
-            quantidade = int(input("Digite a quantidade: "))
+            print('Olá {cliente.nome}!')
             
-            #buscar o produto no banco de dados
-            produto = buscar_produto_por_id(id_produto)
-            if produto is None:
-                print("Produto não encontrado!")
-                continue
-            
-            if produto.estoque_quantidade < quantidade:
-                print("Quantidade indisponível em estoque!")
-                continue
-            
-            #criar o item de venda
-            item_venda = ItemVenda(id_venda=venda.id_venda, id_produto=id_produto, quantidade=quantidade, preco_unitario=produto.preco)
-            itens_venda.append(item_venda)
-            
-            #atualizar o valor total da venda
-            total += quantidade * produto.preco
-            
-            #atualizar o estoque do produto
-            produto.estoque_quantidade -= quantidade
-            session.commit()
-            
-            continuar = input("Deseja adicionar mais produtos? (s/n): ")
-            if continuar.lower() == 'n':
-                break
-    
-    venda.valor_total = total
-    session.commit()
+            #mostrar os produtos disponíveis
+            print("\nProdutos disponíveis: \n")
+            produtos = session.query(Produto).all()
+            for produto in produtos:
+                print(f"ID do produto: {produto.id_produto}, Nome do produto: {produto.nome}, Preço do produto: {produto.preco}, Quantidade em estoque: {produto.estoque_quantidade}")
+                
+            #adicionar itens à venda (laço para adicionar vários itens até que o usuário deseje parar)
+            while True:
+                id_produto = buscar_produto()
+                quantidade = int(input("Digite a quantidade: "))
+                
+                #verificar se o produto existe
+                produto = session.query(Produto).filter(Produto.id_produto == id_produto).first()
+                if produto:
+                    #verificar se a quantidade em estoque é suficiente
+                    if produto.estoque_quantidade < quantidade:
+                        print('Quantidade em estoque insuficiente!')
+                        continue
+                    else:
+                        produto.estoque_quantidade -= quantidade
+                        session.commit()
+                        preco_unitario = produto.preco
+                        total += preco_unitario * quantidade
+                        itens_venda.append((id_produto, quantidade, preco_unitario))
+                        print('Item adicionado com sucesso!')
+                else:
+                    print('Produto não encontrado!')
+                    break
+                
+                #perguntar se deseja adicionar mais itens
+                op = input("Deseja adicionar mais itens? (s/n): ")
+                if op == 'n':
+                    session.query(Venda).filter(Venda.id_venda == venda.id_venda).update({Venda.valor_total: total})
+                    session.commit()
+                    print('Valor total da venda: ', total)
+                    print('Venda finalizada!')
+                    break
      
 def criar_categoria(nome, descricao):
     categoria = Categoria(nome=nome, descricao=descricao)
@@ -351,7 +359,7 @@ def ler_produtos():
     
     for produto in produtos:
         categoria = session.query(Categoria).filter(Categoria.id_categoria == produto.id_categoria).first()
-        print(f"ID: {produto.id_produto}, Nome do produto: {produto.nome}, Descricao do produto: {produto.descricao}, Preco do produto: {produto.preco}, ID da categoria: {produto.id_categoria}")
+        print(f"ID: {produto.id_produto}, Nome do produto: {produto.nome}, Descricao do produto: {produto.descricao}, Preco do produto: {produto.preco}, Quantidade em estoque: {produto.estoque_quantidade}, Categoria: {categoria.nome}")
 
 def ler_vendas():    
     vendas = session.query(Venda).all()

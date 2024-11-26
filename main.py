@@ -27,6 +27,7 @@ def menu_create():
             break
         else:
             print("Opção inválida!")
+            break
     
 def menu_read():
     
@@ -52,6 +53,7 @@ def menu_read():
             break
         else:
             print("Opção inválida!")
+            break
     
 def menu_update():
     
@@ -82,7 +84,6 @@ def menu_update():
                     break
             
         elif op == 2:
-            
             while True:
                 #buscar o produto primeiro
                 id_produto = c.buscar_produto()
@@ -99,8 +100,8 @@ def menu_update():
                     break
                 else:
                     break
+                
         elif op == 3:
-            
             while True:
                 #buscar a categoria primeiro
                 id_categoria = c.buscar_categoria()
@@ -114,6 +115,7 @@ def menu_update():
                     break
                 else:
                     break
+                
         elif op == 4:
             
             while True:
@@ -134,6 +136,7 @@ def menu_update():
             break
         else:
             print("Opção inválida!")
+            break
     
     
 def menu_delete():
@@ -160,8 +163,8 @@ def menu_delete():
                     break
                 else:
                     break
+                
         elif op == 2:
-            
             while True:
                 #buscar o produto primeiro
                 id_produto = c.buscar_produto()
@@ -172,8 +175,8 @@ def menu_delete():
                     break
                 else:
                     break
+                
         elif op == 3:
-            
             while True:
                 #buscar a categoria primeiro
                 id_categoria = c.buscar_categoria()
@@ -184,8 +187,8 @@ def menu_delete():
                     break
                 else:
                     break
+                
         elif op == 4:
-            
             while True:
                 #buscar a venda primeiro
                 id_venda = c.buscar_venda()
@@ -196,10 +199,13 @@ def menu_delete():
                     break
                 else:
                     break
+                
         elif op == 0:
             break
+        
         else:
             print("Opção inválida!")
+            break
 
 def menu():
     while True:
@@ -237,5 +243,6 @@ def menu():
         
         else:
             print("Opção inválida!")
+            break
         
 menu()
