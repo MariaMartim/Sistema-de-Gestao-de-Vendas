@@ -22,9 +22,7 @@ def menu_create():
         elif op == 3:
             c.criar_categoria()
         elif op == 4:
-            #entrar ou com id do cliente ou com o nome para buscar o id
             c.criar_venda()
-                    
         elif op == 0:
             break
         else:

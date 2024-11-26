@@ -283,22 +283,24 @@ def criar_item_venda(id_venda, id_produto, quantidade, preco_unitario):
     print('Item de venda criado com sucesso!')
     
 def criar_venda():
-    #criar a venda
-    venda = Venda(id_cliente=id_cliente, valor_total=0.0, data_venda=date.today())
-    session.add(venda)
-    session.commit() #salvar a venda no banco de dados para obter o id
+    #registrar um cliente
+    id_cliente = buscar_cliente()
     
     #calcular o valor total da venda
     total = 0.0
+    
     #lista de itens de venda
     itens_venda =[]
-    
-    id_cliente = buscar_cliente()
     
     if id_cliente is None:
         return # Retorna caso o cliente não seja encontrado
     else:
         while True:
+            #criar a venda
+            venda = Venda(id_cliente=id_cliente, valor_total=0.0, data_venda=date.today())
+            session.add(venda)
+            session.commit() #salvar a venda no banco de dados para obter o id
+            
             id_produto = int(input("Digite o ID do produto: "))
             quantidade = int(input("Digite a quantidade: "))
             
