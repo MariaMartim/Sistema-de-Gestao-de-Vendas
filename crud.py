@@ -27,7 +27,7 @@ session = Session()
 #Exemplo de uso
 # - Inserção: session.add(objeto) e session.commit()
 
-# - Consulta: session.query(Classe).all() ou session.query(Classe).filter(Classe.atributo == valor).all()
+# - Consulta: session.query(Classe).all() ou session.query(Classe).filter(Classe.atributo == valor).all() ou session.query(Classe).filter(Classe.atributo == valor).one()
 
 # - Atualização: objeto.atributo = novo_valor e session.commit()
 
@@ -81,7 +81,7 @@ class ItemVenda(Base):
     id_venda = Column(Integer, ForeignKey('Venda.id_venda'))
     id_produto = Column(Integer, ForeignKey('Produto.id_produto'))
     quantidade = Column(Integer, nullable=False)
-    preco_un = Column(Float, nullable=False)
+    preco_unitario = Column(Float, nullable=False)
     
     venda = relationship('Venda')
     produto = relationship('Produto')
@@ -309,6 +309,7 @@ def criar_venda():
                         preco_unitario = produto.preco
                         total += preco_unitario * quantidade
                         itens_venda.append((id_produto, quantidade, preco_unitario))
+                        session.commit()
                         print('Item adicionado com sucesso!')
                 else:
                     print('Produto não encontrado!')
@@ -354,7 +355,7 @@ def ler_vendas():
         #mostrar os itens da venda
         itens_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == venda.id_venda).all()
         for item in itens_venda:
-            print(f"    ID do produto: {item.id_produto}, Quantidade: {item.quantidade}, Preco unitario: {item.preco_un}") 
+            print(f"    ID do produto: {item.id_produto}, Quantidade: {item.quantidade}, Preco unitario: {item.preco_unitario}") 
         
 def ler_categorias():
     categorias = session.query(Categoria).all()
@@ -521,7 +522,7 @@ def atualizar_venda():
         #mostrar os itens da venda
         itens_venda = session.query(ItemVenda).filter(ItemVenda.id_item == id_venda).all()
         for item in itens_venda:
-            print(f"    ID do produto: {item.id_produto}, Quantidade: {item.quantidade}, Preco unitario: {item.preco_un}")
+            print(f"    ID do produto: {item.id_produto}, Quantidade: {item.quantidade}, Preco unitario: {item.preco_unitario}")
             
         #o que deseja atualizar?
         while True:
@@ -670,8 +671,8 @@ def deletar_venda():
         itens_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == venda.id_venda).all()
         #mostrar a venda e os itens da venda
         print(f"ID da venda: {venda.id_venda}, Data da venda: {venda.data_venda}, Valor total: {venda.valor_total}, ID do cliente: {venda.id_cliente}")
-        for item in venda.itens_venda:
-            print(f"    ID do produto: {item.id_produto}, Quantidade: {item.quantidade}, Preco unitario: {item.preco_un}")
+        for item in itens_venda:
+            print(f"    ID do produto: {item.id_produto}, Quantidade: {item.quantidade}, Preco unitario: {item.preco_unitario}")
             #apagar os itens da venda
             session.delete(item)
             session.commit()
