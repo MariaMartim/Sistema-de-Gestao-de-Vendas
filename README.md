@@ -19,3 +19,5 @@ Este projeto é um sistema de gestão de vendas que utiliza Python e SQLAlchemy 
   - `mysql-connector-python` para conexão com o MySQL.
   - `sqlalchemy` para abstração de comandos em linguagem sql no código.
   - `datetime` para utilizar datas associadas aos dados.
+
+Link do GitHub: https://github.com/MariaMartim/Sistema-de-Gestao-de-Vendas
