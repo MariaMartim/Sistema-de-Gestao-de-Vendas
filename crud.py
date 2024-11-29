@@ -629,9 +629,20 @@ def deletar_cliente(id):
 def deletar_produto(id):
     produto = session.query(Produto).filter(Produto.id_produto == id).first()
     if produto:
-        session.delete(produto)
-        session.commit()
-        print('Produto deletado com sucesso!')
+        #mostrar o produto, e pedir quantos itens deseja remover
+        print(f"ID: {produto.id_produto}, Nome: {produto.nome}, Descrição: {produto.descricao}, Preço: {produto.preco}, Quantidade em estoque: {produto.estoque_quantidade}")
+        quantidade = int(input("Digite a quantidade a ser removida: "))
+        if produto.estoque_quantidade > quantidade:
+            produto.estoque_quantidade -= quantidade
+            print('Quantidade atualizada com sucesso!')
+            session.commit()
+            print('Quantidade atualizada com sucesso!')
+        elif produto.estoque_quantidade == quantidade:
+            session.delete(produto)
+            session.commit()
+            print('Produto deletado com sucesso!')
+        else:
+            print('Quantidade em estoque insuficiente!')
     else:
         print('Produto não encontrado!')
         
@@ -644,6 +655,10 @@ def deletar_item_venda(id_venda, id_produto, quantidade):
             item_venda.quantidade -= quantidade
             session.commit()
             print('Quantidade atualizada com sucesso!')
+        elif item_venda.quantidade == quantidade:
+            session.delete(item_venda)
+            session.commit()
+            print('Item deletado com sucesso!')
         else:
             session.delete(item_venda)
             session.commit()
@@ -654,8 +669,13 @@ def deletar_item_venda(id_venda, id_produto, quantidade):
 def deletar_venda(id):
     venda = session.query(Venda).filter(Venda.id_venda == id).first()
     if venda:
-        #apaagar os itens da venda
         itens_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id).all()
+        #mostrar a venda e os itens da venda
+        print(f"ID da venda: {venda.id_venda}, Data da venda: {venda.data_venda}, Valor total: {venda.valor_total}, ID do cliente: {venda.id_cliente}")
+        for item in venda.itens_venda:
+            print(f"    ID do produto: {item.id_produto}, Quantidade: {item.quantidade}, Preco unitario: {item.preco_un}")
+        #apagar os itens da venda
+        
         for item in itens_venda:
             session.delete(item)
         session.delete(venda)
