@@ -239,28 +239,20 @@ def criar_produto():
     for categoria in categorias:
         print(f"{categoria.id_categoria}, {categoria.nome}")
         
-    #laço para verificar se a categoria existe
+    #verificar se a categoria existe
+    id_categoria = buscar_categoria()
+        
+    #procurar se o nome do produto já existe por nome e pedir novamente se já existir
     while True:
-        try:
-            input_categoria = int(input("Digite o ID da categoria do produto: "))
-            categoria = session.query(Categoria).filter(Categoria.id_categoria == input_categoria).one()
-            break
-        except NoResultFound:
-            print("Categoria não encontrada!")
-            input_categoria = int(input("Digite o ID da categoria do produto: "))
-    
-    
-    #laço para procurar se o produto já existe por nome e pedir novamente se já existir
-    while True:
-        try:
-            produto = session.query(Produto).filter(Produto.nome == nome).one()
-            print("Produto já existe!")
+        produtos = session.query(Produto).all()
+        if any(produto.nome == nome for produto in produtos):
+            print('Produto já existe!')
             nome = input("Digite o nome do produto: ")
-        except NoResultFound:
+        else:
             break
     
     #criar o produto
-    produto = Produto(nome=nome, descricao=descricao, preco=preco, estoque_quantidade=estoque_quantidade, id_categoria=input_categoria)
+    produto = Produto(nome=nome, descricao=descricao, preco=preco, estoque_quantidade=estoque_quantidade, id_categoria=id_categoria)
     session.add(produto)
     session.commit()
     print('Produto criado com sucesso!')
