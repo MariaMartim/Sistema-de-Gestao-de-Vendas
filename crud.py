@@ -527,7 +527,7 @@ def atualizar_venda():
         print(f"ID da venda: {venda.id_venda}, Data da venda: {venda.data_venda}, Valor total: {venda.valor_total}, ID do cliente: {venda.id_cliente}")
         
         #mostrar os itens da venda
-        itens_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda).all()
+        itens_venda = session.query(ItemVenda).filter(ItemVenda.id_item == id_venda).all()
         for item in itens_venda:
             print(f"    ID do produto: {item.id_produto}, Quantidade: {item.quantidade}, Preco unitario: {item.preco_un}")
             
@@ -617,7 +617,8 @@ def atualizar_venda():
                         
 #DELETE
 
-def deletar_cliente(id):
+def deletar_cliente():
+    id = buscar_cliente()
     cliente = session.query(Cliente).filter(Cliente.id_cliente == id).first()
     if cliente:
         session.delete(cliente)
@@ -626,8 +627,9 @@ def deletar_cliente(id):
     else:
         print('Cliente não encontrado!')
         
-def deletar_produto(id):
-    produto = session.query(Produto).filter(Produto.id_produto == id).first()
+def deletar_produto():
+    id_produto = buscar_produto()
+    produto = session.query(Produto).filter(Produto.id_produto == id_produto).first()
     if produto:
         #mostrar o produto, e pedir quantos itens deseja remover
         print(f"ID: {produto.id_produto}, Nome: {produto.nome}, Descrição: {produto.descricao}, Preço: {produto.preco}, Quantidade em estoque: {produto.estoque_quantidade}")
@@ -646,10 +648,14 @@ def deletar_produto(id):
     else:
         print('Produto não encontrado!')
         
-def deletar_item_venda(id_venda, id_produto, quantidade):
+def deletar_item_venda(id_venda, id_produto):
+    id_venda = buscar_venda()
+    id_produto = buscar_produto()
     item_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id_venda, ItemVenda.id_produto == id_produto).first()
     #verificar se o item existe
     if item_venda:
+        #pedir quantidade a ser removida
+        quantidade = int(input("Digite a quantidade a ser removida: "))
         #verificar se a quantidade a ser removida é menor que a quantidade do item
         if item_venda.quantidade > quantidade:
             item_venda.quantidade -= quantidade
@@ -666,26 +672,25 @@ def deletar_item_venda(id_venda, id_produto, quantidade):
     else:
         print('Item não encontrado na venda!')
         
-def deletar_venda(id):
-    venda = session.query(Venda).filter(Venda.id_venda == id).first()
+def deletar_venda():
+    venda = buscar_venda()
     if venda:
-        itens_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == id).all()
+        itens_venda = session.query(ItemVenda).filter(ItemVenda.id_venda == venda.id_venda).all()
         #mostrar a venda e os itens da venda
         print(f"ID da venda: {venda.id_venda}, Data da venda: {venda.data_venda}, Valor total: {venda.valor_total}, ID do cliente: {venda.id_cliente}")
         for item in venda.itens_venda:
             print(f"    ID do produto: {item.id_produto}, Quantidade: {item.quantidade}, Preco unitario: {item.preco_un}")
-        #apagar os itens da venda
-        
-        for item in itens_venda:
+            #apagar os itens da venda
             session.delete(item)
+            session.commit()
         session.delete(venda)
         session.commit()
         print('Venda deletada com sucesso!')
     else:
         print('Venda não encontrada!')
         
-def deletar_categoria(id):
-    categoria = session.query(Categoria).filter(Categoria.id_categoria == id).first()
+def deletar_categoria():
+    categoria = buscar_categoria()
     if categoria:
         session.delete(categoria)
         session.commit()
