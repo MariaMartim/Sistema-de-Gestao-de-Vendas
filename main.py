@@ -43,12 +43,16 @@ def menu_read():
 
         if op == 1:
             c.ler_clientes()
+            break
         elif op == 2:
             c.ler_produtos()
+            break
         elif op == 3:
             c.ler_categorias()
+            break
         elif op == 4:
             c.ler_vendas()
+            break
         elif op == 0:
             break
         else:
@@ -99,57 +103,19 @@ def menu_delete():
         op = int(input("Digite a opção desejada: "))
     
         if op == 1:
-            
-            while True:
-                #buscar o cliente primeiro
-                id_cliente = c.buscar_cliente()
-                
-                #se existir, deletar
-                if id_cliente: 
-                    c.deletar_cliente(id_cliente)
-                    break
-                else:
-                    break
-                
+            c.deletar_cliente()
+            break
         elif op == 2:
-            while True:
-                #buscar o produto primeiro
-                id_produto = c.buscar_produto()
-                
-                #se existir, deletar
-                if id_produto: 
-                    c.deletar_produto(id_produto)
-                    break
-                else:
-                    break
-                
+            c.deletar_produto()
+            break
         elif op == 3:
-            while True:
-                #buscar a categoria primeiro
-                id_categoria = c.buscar_categoria()
-                
-                #se existir, deletar
-                if id_categoria: 
-                    c.deletar_categoria(id_categoria)
-                    break
-                else:
-                    break
-                
+            c.deletar_categoria()
+            break
         elif op == 4:
-            while True:
-                #buscar a venda primeiro
-                id_venda = c.buscar_venda()
-                
-                #se existir, deletar
-                if id_venda: 
-                    c.deletar_venda(id_venda)
-                    break
-                else:
-                    break
-                
+            c.deletar_venda()
+            break
         elif op == 0:
             break
-        
         else:
             print("Opção inválida!")
             break
